@@ -204,72 +204,7 @@ namespace InputTools
       
     }
     prm.leave_subsection ();
-    /*
-    prm.enter_subsection ("Excitation Coil Data");
-    {
-      // TODO:
-      // For now we can only handle an array of excitation coils
-      // which lie in a circle around a particular point. These are
-      // then used to generate a set of positions and directions.
-      // Ideally we would be able to read in a list of
-      // coil positions and directions. This would mean we would
-      // only read in the number of coils and their position/directions.
-      
-      prm.declare_entry("number of coils", "1",
-                        Patterns::Integer(1,100),
-                        "Number of excitation coils in the array");
-      
-      prm.declare_entry("array centre","0.0, 0.0, 0.0",
-                        Patterns::List(Patterns::Double(),3,3,","),
-                        "Centre of the excitation coil array");
-      
-      prm.declare_entry("array radius", "0.0145",
-                        Patterns::Double(0),
-                        "Radius of the excitation coil array"); 
-                       
-      prm.declare_entry("array start angle", "0.0",
-                        Patterns::Double(),
-                        "Angle (in degrees) to the position of the first excitation coil");
-      
-      prm.declare_entry("coil radius", "0.025",
-                       Patterns::Double(0),
-                       "Radius of an excitation coil");                       
-    }
-    prm.leave_subsection ();
-    
-    prm.enter_subsection ("Sensor Coil Data");
-    {
-      // TODO:
-      // For now we can only handle an array of sensor coils
-      // which lie in a circle around a particular point. These are
-      // then used to generate a set of positions and directions.
-      // Ideally we would be able to read in a list of
-      // coil positions and directions. This would mean we would
-      // only read in the number of coils and their position/directions.
-      // Not sure how easy this is to do when the list length is unknown??
-      
-      prm.declare_entry("number of coils", "1",
-                        Patterns::Integer(1,100),
-                        "Number of sensor coils");
-      
-      prm.declare_entry("array centre","0.0, 0.0, 0.0",
-                        Patterns::List(Patterns::Double(),3,3,","),
-                        "Centre of the sensor coil array");
-     
-      prm.declare_entry("array radius", "0.0135",
-                        Patterns::Double(0),
-                        "Radius of the sensor coil array");
-      
-      prm.declare_entry("array start angle", "0.0",
-                        Patterns::Double(),
-                        "Angle (in degrees) to the position of the first sensor coil");
-      
-      prm.declare_entry("coil radius", "0.025",
-                       Patterns::Double(0),
-                       "Radius of an individual sensor coil");
-    }
-    prm.leave_subsection ();
-    */
+  
     prm.enter_subsection("Preconditioner Data");
     {
       // Disable the gmres solver:
@@ -332,29 +267,7 @@ namespace InputTools
                         "Imaginary part of uniform background field");
     }
     prm.leave_subsection ();
-    /*
-    prm.enter_subsection("TEAM Benchmark");
-    {
-      prm.declare_entry("enable", "false",
-                        Patterns::Bool(),
-                        "Enable the TEAM Benchmark");
-      
-      prm.declare_entry("coil centre", "0.194, 0.1, 0.099",
-                        Patterns::List(Patterns::Double(),3,3,","),
-                        "Centre of the coil");
-      
-      prm.declare_entry("corner centres",
-                        "0.144, 0.05, 0.099; 0.244, 0.05, 0.099; 0.244, 0.15, 0.099; 0.144, 0.15, 0.099",
-                        Patterns::List(Patterns::List(Patterns::Double(),3,3,","),4,4,";"),
-                        "Centres of the corner arcs of the coil");
-      
-      prm.declare_entry("coil material id", "2",
-                        Patterns::Integer(0),
-                        "Material ID of the coil, specified in the mesh file");
-    }
-    
-    prm.leave_subsection ();
-    */
+   
 
   }
   
@@ -438,7 +351,7 @@ namespace InputTools
     prm.enter_subsection("Mesh Data");
     
     MeshData::external_mesh = prm.get_bool("external mesh");
-    //TODO: remove and leave only MeshData::mesh_filename (will have to update all codes first.)
+    
     IO_Data::mesh_filename = prm.get("mesh file");
     MeshData::mesh_filename = prm.get("mesh file");
     
@@ -505,37 +418,7 @@ namespace InputTools
     //      array radius
     //      array start angle
     //      coil radius
-    /*
-    prm.enter_subsection("Excitation Coil Data");
     
-    ExcitationCoilData::number_of_coils = prm.get_integer("number of coils");
-    
-    get_vector_from_list("array centre", temp_vector1, 3);
-    for (unsigned int i=0; i<3; ++i)
-    {
-      ExcitationCoilData::array_centre[i] = temp_vector1(i);
-    }
-    ExcitationCoilData::array_radius = prm.get_double("array radius");
-    ExcitationCoilData::array_angle = prm.get_double("array start angle");
-    ExcitationCoilData::coil_radius = prm.get_double("coil radius");
-    
-    prm.leave_subsection();
-    
-    prm.enter_subsection("Sensor Coil Data");
-    
-    SensorCoilData::number_of_coils = prm.get_integer("number of coils");
-    
-    get_vector_from_list("array centre", temp_vector1, 3);
-    for (unsigned int i=0; i<3; ++i)
-    {
-      SensorCoilData::array_centre[i] = temp_vector1(i);
-    }
-    SensorCoilData::array_radius = prm.get_double("array radius");
-    SensorCoilData::array_angle = prm.get_double("array start angle");
-    SensorCoilData::coil_radius = prm.get_double("coil radius");
-    
-    prm.leave_subsection();
-    */
     prm.enter_subsection("Preconditioner Data");
     PreconditionerData::use_direct = prm.get_bool("use direct");
     PreconditionerData::solver_tolerance = prm.get_double("solver tolerance");
@@ -565,26 +448,7 @@ namespace InputTools
     get_vector_from_list("uniform field real", PolarizationTensor::H0[0],3);
     get_vector_from_list("uniform field imaginary", PolarizationTensor::H0[1],3);
     prm.leave_subsection();
-    /*
-    prm.enter_subsection("TEAM Benchmark");
-    TEAMBenchmark::enable = prm.get_bool("enable");
-    get_vector_from_list("coil centre", temp_vector1, 3);
-    for (unsigned int i=0;i<3;++i)
-    {
-      TEAMBenchmark::coil_centre[i] = temp_vector1(i);
-    }
-    FullMatrix<double> temp(4,3);
-    get_matrix_from_list("corner centres", temp, 4, 3);
-    for (unsigned int i=0;i<4;++i)
-    {
-      for (unsigned int j=0;j<3;++j)
-      {
-        TEAMBenchmark::corner_centres[i][j] = temp(i,j);
-      }
-    }
-    TEAMBenchmark::coil_material_id = prm.get_integer("coil material id");
-    prm.leave_subsection ();
-    */
+   
   }
   
   void ParameterReader::read_parameters (const std::string parameter_file)

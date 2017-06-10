@@ -27,6 +27,7 @@
 
 #include <deal.II/fe/fe_nedelec.h>
 
+// Archivos que componen este solucionador
 #include <all_data.h>
 #include <backgroundfield.h>
 #include <eddycurrentfunction.h>
@@ -36,20 +37,21 @@
 #include <mypreconditioner.h>
 #include <myvectortools.h>
 #include <outputtools.h>
-
 #include <myfe_nedelec.h>
+
 
 using namespace dealii;
 
+//*****shereBenchmark*****************************************************
 namespace sphereBenchmark
 {
-  
+  //__________sphereBenchmark______________________________________-
   template <int dim>
   class sphereBenchmark
   {
   public:
     sphereBenchmark (const unsigned int poly_order,
-                     const unsigned int mapping_order);
+                     const unsigned int mapping_order=2);
     ~sphereBenchmark ();
     void run(std::string input_filename,
              std::string output_filename,
@@ -65,7 +67,8 @@ namespace sphereBenchmark
     void initialise_materials();
     void process_mesh(bool neuman_flag);
   };
-  
+  //________sphereBenchmark,end____________________________
+  //----Constructor---------
   template <int dim>
   sphereBenchmark<dim>::sphereBenchmark(const unsigned int poly_order,
                                         const unsigned int mapping_order)
@@ -77,12 +80,14 @@ namespace sphereBenchmark
   {
   }
   
+  //-----Destructor------
   template <int dim>
   sphereBenchmark<dim>::~sphereBenchmark ()
   {
     dof_handler.clear ();  
   }
   
+  //------initialise_materials-------------------
   template <int dim>
   void sphereBenchmark<dim>::initialise_materials()
   {
@@ -111,23 +116,11 @@ namespace sphereBenchmark
       // Unregularised - will be handled in forward solver.
       EquationData::param_kappa_re(i) = 0.0;
       EquationData::param_kappa_im(i) = EquationData::param_sigma(i)*EquationData::param_omega*EquationData::constant_mu0;
-      // TODO:
-      // remove this later.
-      // This was how I handled it, which would regularised all DoFs if they're in a cell with zero sigma (and thus zero kappa).
-      /*
-      if (EquationData::param_sigma(i) > 0)
-      {
-        EquationData::param_kappa_re(i) = 0.0;
-        EquationData::param_kappa_im(i) = EquationData::param_sigma(i)*EquationData::param_omega*EquationData::constant_mu0;
-      }
-      else
-      {
-        EquationData::param_kappa_re(i) = 0.0;//EquationData::param_regularisation*EquationData::param_omega*EquationData::constant_mu0;
-        EquationData::param_kappa_im(i) = EquationData::param_regularisation*EquationData::param_omega*EquationData::constant_mu0;
-        //0.0;//EquationData::param_regularisation*EquationData::constant_mu0*EquationData::param_omega;
-      }*/
+     
     }
   }
+  
+  //----------process_mesh---------
   template <int dim>
   void sphereBenchmark<dim>::process_mesh(bool neumann_flag)
   {
@@ -135,27 +128,12 @@ namespace sphereBenchmark
     typename Triangulation<dim>::cell_iterator cell;
     const typename Triangulation<dim>::cell_iterator endc = tria.end();
     
-    // Move any vertices by a small amount if they lie on the central point.
-    // This is done to avoid the singular point in the solution which
-    // lies at (0,0,0).
-//     cell = tria.begin ();
-//     for (; cell!=endc; ++cell)
-//     {
-//       for (unsigned int i=0; i<GeometryInfo<dim>::vertices_per_cell; ++i)
-//       {
-//         if (sqrt(cell->vertex(i).square()) < 1e-10)
-//         {
-//           cell->vertex(i) += Point<dim> (1e-3,1e-3,1e-3);
-//         }
-//       }
-//     }
-    
     // Make the interior sphere's boundary a spherical boundary:    
     // First set all manifold_ids to 0 (default).
     cell = tria.begin ();
     for (; cell!=endc; ++cell)
     {
-      cell->set_all_manifold_ids(numbers::invalid_manifold_id); //numbers::invalid_manifold_id es un marcado de Deal.ii
+      cell->set_all_manifold_ids(numbers::invalid_manifold_id); //numbers::invalid_manifold_id es un marcador de Deal.ii
     }
     // Now find those on the surface of the sphere.
     // Do this by looking through all cells with material_id
@@ -186,7 +164,7 @@ namespace sphereBenchmark
           }
         }
       }
-	//Es necesario este ultimo ciclo? Me parece que está poniendo como esférico el manifold de todas las celdas del no conductor
+      //Es necesario este ultimo ciclo? Me parece que está poniendo como esférico el manifold de todas las celdas del no conductor
       if (cell->material_id() == 0)
       {
         cell-> set_all_manifold_ids(100);
@@ -226,18 +204,9 @@ namespace sphereBenchmark
         }
       }
     }
-
-    // Now refine the outer mesh
-//     cell = tria.begin();
-//     for (; cell!=endc; ++cell)
-//     {
-// //       if (cell->material_id() == 0)
-// //       {
-//         cell->set_refine_flag();
-// //       }
-//     }
-//     tria.execute_coarsening_and_refinement ();
-  }
+   }
+  
+  //---------run---------------------------
   template <int dim>
   void sphereBenchmark<dim>::run(std::string input_filename, 
                                  std::string output_filename,
@@ -252,7 +221,7 @@ namespace sphereBenchmark
     static const SphericalManifold<dim> sph_boundary; //SphericalManifold clase perteneciente a deal.ii
     if (!MeshData::external_mesh)//Si no hay un archivo con el mallado
     {
-//       double inner_ball_radius = 0.5*sphere_radius;
+      
       const double ball_radius = sphere_radius; //sphere_radious=inner_radious
       // Make the central shell account for 1/4 of the shell part of the mesh:
       const double middle_radius = 0.25*(MeshData::radius - MeshData::inner_radius) + MeshData::inner_radius;
@@ -270,35 +239,9 @@ namespace sphereBenchmark
       typename Triangulation<dim>::cell_iterator endc = whole_ball.end();
       for (;cell!=endc; ++cell)
       {
-        cell->set_material_id(1); //Tipo de material_id en la forntera interna, debe ser conductor?
+        cell->set_material_id(1); //Tipo de material_id en la forntera interna, debe ser conductor.
       }   
-      /*
-      GridGenerator::hyper_ball(inner_ball,
-                                Point<dim> (0.0,0.0,0.0),
-                                inner_ball_radius);
-      typename Triangulation<dim>::cell_iterator cell = inner_ball.begin();
-      typename Triangulation<dim>::cell_iterator endc = inner_ball.end();
-      for (;cell!=endc; ++cell)
-      {
-        cell->set_material_id(1);
-      }      
-      GridGenerator::hyper_shell(outer_ball,
-                                 Point<dim> (0.0,0.0,0.0),
-                                 inner_ball_radius,
-                                 ball_radius,
-                                 6);
-      cell = outer_ball.begin();
-      endc = outer_ball.end();
-      for (;cell!=endc; ++cell)
-      {
-        cell->set_material_id(1);
-      }
-
-      
-      GridGenerator::merge_triangulations(inner_ball,
-                                          outer_ball,
-                                          whole_ball);      */
-      
+           
       GridGenerator::hyper_shell(middle_shell,
                                  Point<dim> (0.0,0.0,0.0),
                                  ball_radius,
@@ -308,7 +251,7 @@ namespace sphereBenchmark
       endc = middle_shell.end();
       for (;cell!=endc; ++cell)
       {
-        cell->set_material_id(0);//Tipo de material_id en el cascaron interno, debe ser no conductor?
+        cell->set_material_id(0);//Tipo de material_id en el cascaron interno, debe ser no conductor
       }
       Triangulation<dim> middle_ball;
       GridGenerator::merge_triangulations(whole_ball,
@@ -324,7 +267,7 @@ namespace sphereBenchmark
       endc = outer_shell.end();
       for (;cell!=endc; ++cell)
       {
-        cell->set_material_id(0);//Tipo de material_id en el cascarón externo, debe ser no conductor?
+        cell->set_material_id(0);//Tipo de material_id en el cascarón externo, debe ser no conductor
       }
       GridGenerator::merge_triangulations(middle_ball,
                                           outer_shell,
@@ -342,13 +285,13 @@ namespace sphereBenchmark
     else //Si hay un archivo con el mallado
     {
       InputTools::read_in_mesh<dim>(IO_Data::mesh_filename,
-                                    tria); //Leer el mallado del archivo externo?
+                                    tria); //Leer el mallado del archivo externo
       
       
       
       process_mesh(EquationData::neumann_flag); //Función interna que asigna condiciones de frontera 
       // Set the marked boundary to be spherical:
-      tria.set_manifold (100, sph_boundary); //Función de Triangulation de deal.ii, asigna un manifold a una parte de la triangulación(no se a qué parte)
+      tria.set_manifold (100, sph_boundary); //Función de Triangulation de deal.ii, asigna una variedad esférica a las celdas con id 100 
       if (href>0)
       {
         tria.refine_global(href); //Función de Triangulation de deal.ii, refina href veces el mallado de la triangulación tria
@@ -364,7 +307,7 @@ namespace sphereBenchmark
     // Now setup the forward problem:
     dof_handler.distribute_dofs (fe); //Clase perteneciente a deal.ii, .distribute.dofs(fe) indexa los grados de libertas del objeto de elementos finitos fe
     
-    const MappingQ<dim> mapping(mapping_order, (mapping_order>1 ? true : false)); //Clase de dela.ii. Se utilizan polinomios de orden mapping_order en todas las celdas; si mapping_order >1 entonces se utilizan polinomios de orden mapping_order, en caso contrario se utilizan las bases de menos orden posbile según la triangulación.
+    const MappingQ<dim> mapping(mapping_order, (mapping_order>1 ? true : false)); //Clase de deal.ii. Se utilizan polinomios de orden mapping_order en todas las celdas; si mapping_order >1 entonces se utilizan polinomios de orden mapping_order, en caso contrario se utilizan las bases de menos orden posbile según la triangulación.
 
 //     const MappingQ1<dim> mapping;
     ForwardSolver::EddyCurrent<dim, DoFHandler<dim>> eddy(mapping,
@@ -393,35 +336,19 @@ namespace sphereBenchmark
       uniform_field(d) = PolarizationTensor::H0[0](d);//Parte real del campo incidente
     }
     
-    EddyCurrentFunction<dim>* boundary_conditions; //no se de donde proviene, puntero a un objeto de la clase EddyCurrentFunction<dim>,debe ser definida por el usuario
+    EddyCurrentFunction<dim>* boundary_conditions;//Se crea una función de deal.ii que calcula las varaibles relacionadas al campo incidente
     if (PolarizationTensor::enable)
     {
       boundary_conditions
       = new backgroundField::conductingObject_polarization_tensor<dim>
           (PolarizationTensor::H0,
-           PolarizationTensor::polarizationTensor); //el puntero boundary_conditions adquiere un valor     
+           PolarizationTensor::polarizationTensor); //usar condiciones de frontera para un vector de polarización conocido     
     }
     else
     {
       boundary_conditions
-      = new backgroundField::conductingSphere<dim> (sphere_radius, PolarizationTensor::H0); //el puntero boundary_conditions adquiere un valor
+      = new backgroundField::conductingSphere<dim> (sphere_radius, PolarizationTensor::H0); //usar condiciones de frontera para un campo magnético incidente conocido
     }
-    
-    // Check the exact field:
-    /*
-    std::vector<Vector<double> > sol(2, Vector<double>(dim+dim));
-    std::vector<Point<dim> > points(2);
-    points[0]=Point<dim> (0.6,0.6,0.6);
-    points[1]=Point<dim> (0.25,0.25,0.25);
-    boundary_conditions.vector_value_list(points, sol);
-    for (unsigned int k=0; k<2; ++k)
-    {
-      for (unsigned int i=0; i<dim; ++i)
-      {
-        std::cout << sol[k](i) << " + " << sol[k](i+dim) << "*i" << std::endl;
-      }
-    }
-    */
     
     // assemble rhs
     deallog << "Assembling System RHS...." << std::endl;
@@ -554,6 +481,7 @@ namespace sphereBenchmark
     delete boundary_conditions;
   }
 }
+//*****************sphereBenchmark,end********************************************************
 
 int main (int argc, char* argv[])
 {

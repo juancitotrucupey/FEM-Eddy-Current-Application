@@ -58,38 +58,39 @@ public:
   // effectively making it the default value for that argument.
   //
   // Obviously derived classes an bypass this if required.
-  
+  //-----------------------vector_value_list()-----------------------------------------------
   virtual void vector_value_list (const std::vector<Point<dim> > &points,
                                   std::vector<Vector<double> >   &values) const;
-  
+  //------------------vector_value_list()-------------------------------------------------
   virtual void vector_value_list (const std::vector<Point<dim> > &points,
                                   std::vector<Vector<double> >   &values,
                                   const types::material_id &mat_id) const;
-                                  
+  //-----------------------------curl_value_list()----------------------------------------------                                
   virtual void curl_value_list (const std::vector<Point<dim> > &points,
                                 std::vector<Vector<double> >   &values) const;
-
+  //-----------------------curl_value_list()----------------------------------------------
   virtual void curl_value_list (const std::vector<Point<dim> > &points,
                                 std::vector<Vector<double> >   &values,
                                 const types::material_id &mat_id) const;
-                                
+  //----------------------perturbed_field_value_list()-------------------------------------------                              
   virtual void perturbed_field_value_list (const std::vector<Point<dim> > &points,
                                            std::vector<Vector<double> >   &values) const;
-
+  //------------------------perturbed_field_value_list()-----------------------------------------
   virtual void perturbed_field_value_list (const std::vector<Point<dim> > &points,
                                            std::vector<Vector<double> >   &values,
                                            const types::material_id &mat_id) const;
-
+  //---------------------rhs_value_list()-----------------------------------------------------
   virtual void rhs_value_list (const std::vector<Point<dim> > &points,
                                std::vector<Vector<double> >   &values) const;
-                               
+  //-----------------------rhs_value_list()-----------------------------------------------                             
   virtual void rhs_value_list (const std::vector<Point<dim> > &points,
                                std::vector<Vector<double> >   &values,
                                const types::material_id &mat_id) const;
-
+  //-------------zero_vector(),zeri_curl(),zero_perturbed(),zero_rhs()-----------------------------------
   virtual bool zero_vector() const { return true; }
   virtual bool zero_curl() const { return true; }
   virtual bool zero_perturbed() const { return true; }
   virtual bool zero_rhs() const { return true; }
 };
+//___________________________________EddyCurrentfunction,end_________________________________________________________________
 #endif

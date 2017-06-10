@@ -20,45 +20,6 @@
 
 using namespace dealii;
 
-/*
-template<int dim>
-class curlFunction : public Function<dim>
-{
-public:
-  virtual void curl_value_list (const std::vector<Point<dim> > &points,
-                                std::vector<Vector<double> >   &values) const = 0;
-  
-  //virtual void perturbed_field_value_list (const std::vector<Point<dim> > &points,
-  //                                         std::vector<Vector<double> >   &values) const = 0;
-};
-*/
-// template<int dim>
-// curlFunction<dim>::curlFunction()//unsigned int n_components)
-// :
-// // Function<dim> (n_components)
-// {
-// }
-//template class curlFunction<3>;
-/*
-template<int dim>
-class perturbedFunction : public curlFunction<dim>
-{
-public:
-  virtual void curl_value_list (const std::vector<Point<dim> > &points,
-                                std::vector<Vector<double> >   &values) const = 0;
-                                
-  virtual void perturbed_field_value_list (const std::vector<Point<dim> > &points,
-                                           std::vector<Vector<double> >   &values) const = 0;
-};
-*/
-// template<int dim>
-// perturbedFunction<dim> ::perturbedFunction()//unsigned int n_components)
-// :
-// // curlFunction<dim> (n_components)
-// {}
-//template class perturbedFunction<3>;
-
-
 // Implementation of the virtual functions for EddyCurrentFunction:
 // In all cases we just return zero, and so set the zero_xxx boolean function to return true.
 // This means that any derived classes will need to implement pairs of the appropriate xxx_value_list

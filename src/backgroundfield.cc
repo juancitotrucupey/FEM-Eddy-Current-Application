@@ -22,110 +22,6 @@ using namespace dealii;
 
 namespace backgroundField
 {
-  // DIPOLESOURCE
-/*
-  template<int dim>
-  DipoleSource<dim>::DipoleSource(const Point<dim> &input_source_point,
-                                  const Tensor<1, dim> &input_coil_direction)
-  :
-  source_point(input_source_point),
-  coil_direction(input_coil_direction)
-  {}
-  
-  // members:
-  template <int dim>
-  void DipoleSource<dim>::vector_value_list (const std::vector<Point<dim> > &points,
-                                             std::vector<Vector<double> > &value_list,
-                                             const types::material_id &mat_id) const
-  {
-    Assert(value_list.size() == points.size(), ExcDimensionMismatch(value_list.size(), points.size()));
-        
-    Tensor<1,dim> shifted_point;
-    Tensor<1,dim> result; 
-    for (unsigned int k=0; k<points.size(); ++k)
-    {
-      const Point<dim> &p = points[k];
-      // Work out the vector (stored as a tensor so we can use cross_product)
-      // from the source point to the current point, p
-       
-      for (unsigned int i = 0; i < dim; ++i)
-      {
-        shifted_point[i] = p(i) - source_point(i);
-      }
-      double rad = p.distance(source_point);
-      double factor = EquationData::constant_mu0*1.0/(4.0*numbers::PI*rad*rad*rad);
-      
-      cross_product(result, coil_direction, shifted_point);
-      result *= factor;
-      for (unsigned int i = 0; i < dim; ++i)
-      {
-        // Real
-        value_list[k](i) = result[i];
-        // Imaginary
-        value_list[k](i+dim) = 0.0;
-      }
-    }
-  }
-  template <int dim>
-  void DipoleSource<dim>::curl_value_list (const std::vector<Point<dim> > &points,
-                                           std::vector<Vector<double> > &value_list,
-                                           const types::material_id &mat_id) const
-  {
-    Assert(value_list.size() == points.size(), ExcDimensionMismatch(value_list.size(), points.size()));
-    
-    FullMatrix<double> rhat(dim);
-    FullMatrix<double> D2G(dim);
-    FullMatrix<double> eye(IdentityMatrix(3));
-    Vector<double> result(dim);
-    // create a vector-version of the tensor coil_direction.
-    // There may be a far better way to deal with this.... (TODO)
-    // e.g. Use Tensor<2,dim> for the matrices instead, making the whole thing more tensor based.
-    Vector<double> coil_direction(dim);
-    for (unsigned int i = 0; i < dim; ++i)
-    {
-      coil_direction(i) = coil_direction[i];
-    }
-
-    Tensor<1,dim> shifted_point;
-    Vector<double> scaled_vector(dim);
-
-    for (unsigned int k=0; k<points.size(); ++k)
-    {
-      const Point<dim> &p = points[k];
-      // Work out the vector (stored as a tensor so we can use cross_product)
-      // from the source point to the current point, p
-      for (unsigned int i = 0; i < dim; ++i)
-      {
-        shifted_point[i] = p(i) - source_point(i);
-      }
-      double rad = p.distance(source_point);
-      double factor = 1.0/(4.0*numbers::PI*rad*rad*rad);
-
-      // Construct D2G
-      for (unsigned int i = 0; i < dim; ++i)
-      {
-        scaled_vector(i)=shifted_point[i]/rad;
-      }
-      rhat.outer_product(scaled_vector,scaled_vector);
-      D2G=0;
-      D2G.add(3.0,rhat,-1.0,eye);
-
-      D2G.vmult(result, coil_direction);
-
-      result *= factor;
-      for (unsigned int i=0;i<dim;i++)
-      {
-        // Real
-        value_list[k](i) = result[i];
-        // Imaginary
-        value_list[k](i+dim) = 0.0;
-      }
-    }
-  }
-  template class DipoleSource<3>;
-*/
-  // END DIPOLESOURCE
-  
   // CONDUCTINGSPHERE
   template<int dim>
   conductingSphere<dim>::conductingSphere(double sphere_radius,
@@ -165,9 +61,7 @@ namespace backgroundField
        constant_D = pow(sphere_radius,3)*( (2.0*mu_c + mu_n)*v*besselhalf_minus - (mu_n*(1.0+v*v) + 2.0*mu_c)*besselhalf_plus )
                     / ( (mu_c - mu_n)*v*besselhalf_minus + (mu_n*(1.0+v*v)-mu_c)*besselhalf_plus );
     }
-    // Debugging (can compare to matlab code)
-//     std::cout << constant_C.real() << " + "<<constant_C.imag() << "i" << std::endl;
-//     std::cout << constant_D.real() << " + "<<constant_D.imag() << "i" << std::endl;
+
   }
   
   template <int dim>
@@ -226,14 +120,6 @@ namespace backgroundField
     for (unsigned int k=0; k<points.size(); ++k)
     {
       
-      // Use the perturbed values:
-      /*
-      for (unsigned int d=0; d<dim; ++d)
-      {
-        value_list[k](d) = perturbed_values[k](d) + uniform_field_re(d);
-        value_list[k](d+dim) = perturbed_values[k](d+dim) + uniform_field_im(d);
-      }
-      */
       const Point<dim> &p = points[k];
       double r, theta, phi;
       // Convert (x,y,z) to (r,theta,phi), spherical polars.
@@ -308,8 +194,7 @@ namespace backgroundField
     // In general, this is only valid outside of the object, so return 0
     // for any position within the object.
     //
-    // TODO: Assume that the centre of the object is (0,0,0) for now
-    
+       
     Assert(value_list.size() == points.size(), ExcDimensionMismatch(value_list.size(), points.size()));
 
     FullMatrix<double> rhat(dim);
@@ -328,7 +213,6 @@ namespace backgroundField
       {
         for (unsigned int i=0; i<dim; ++i)
         {
-          // TODO: add the formula for the inside of the sphere.
           value_list[k](i) = 0.0;
           value_list[k](i+dim) = 0.0;
         }
@@ -406,9 +290,7 @@ namespace backgroundField
     Assert(value_list.size() == points.size(), ExcDimensionMismatch(value_list.size(), points.size()));
     
     // No analytical solution, just set uniform far field conditions. 
-    // TODO: switch over to using the perturbation tensor to calculate hte
-    //       perturbed field, then add the uniform field.
-    
+       
     std::vector<Vector<double> > perturbed_value_list(value_list.size(), Vector<double> (dim+dim));
     perturbed_field_value_list(points, perturbed_value_list, mat_id);
     
@@ -417,8 +299,7 @@ namespace backgroundField
       for (unsigned int d=0; d<dim; ++d)
       {
         // Seems to only work when we treat the BC as n x curl E = 
-        // TODO: work out why using curl(A) = B (computed from perturbation tensor formula) doesn't work.
-        
+                
         value_list[k](d) = perturbed_value_list[k](d) + uniform_field[0](d);
         //EquationData::constant_mu0*
         value_list[k](d+dim) = perturbed_value_list[k](d+dim) + uniform_field[1](d);
@@ -433,8 +314,7 @@ namespace backgroundField
     // Returns the value of the perturbed field:
     // H_{p} = H - H_{0}
     //
-    // TODO: Assume that the centre of the object is (0,0,0) for now
-    
+        
     Assert(value_list.size() == points.size(), ExcDimensionMismatch(value_list.size(), points.size()));
 
     FullMatrix<double> rhat(dim);
@@ -474,7 +354,6 @@ namespace backgroundField
         }
         rhat.outer_product(scaled_vector,scaled_vector);
         
-        // TODO: fix so that complex uniform field would work (don't use it for now, so not an immediate problem).
         polarizationTensor[0].vmult(PTresult[0], uniform_field[0]);
         //polarizationTensor[0].vmult(PTresult[1], uniform_field[1]);
         
@@ -657,7 +536,6 @@ namespace backgroundField
     {
       for (unsigned int d=0; d<dim; ++d)
       {
-        // TODO: Make sure this doesn't need to be scaled by some factor
         value_list[k](d) = uniform_field[0](d);
         value_list[k](d+dim) = uniform_field[1](d);
       }
@@ -666,177 +544,4 @@ namespace backgroundField
   template class curlUniformField<3>;
   // END curlUniformField
   
-  // TEAMBenchmark7
-/*
-  template<int dim>
-  TEAMBenchmark7<dim>::TEAMBenchmark7(const Point<dim> &coil_centre,
-                                      const std::vector<Point<dim>> &corner_centres,
-                                      const types::material_id coil_mat_id)
-  :
-  coil_centre(coil_centre),
-  corner_centres(corner_centres),
-  coil_mat_id(coil_mat_id)
-  {
-  }
-  
-  template<int dim>
-  void TEAMBenchmark7<dim>::rhs_value_list(const std::vector<Point<dim> > &points,
-                                           std::vector<Vector<double> >   &values,
-                                           const types::material_id &mat_id) const
-  {
-    Assert(values.size() == points.size(), ExcDimensionMismatch(values.size(), points.size()));
-    // First, avoid any work if the we're outside the coil material.
-    if (mat_id != coil_mat_id)
-    {
-      for (unsigned int k=0; k<points.size(); ++k)
-      {
-        values[k]=0;
-      }
-    }
-    else
-    {
-      for (unsigned int k=0; k<points.size(); ++k)
-      {
-        const Point<dim> &p = points[k];
-        // Work out position vector with respect to coil centre
-        // and find the quadrant within the coil.
-        const Point<dim> p0 (p[0] - coil_centre[0],
-                             p[1] - coil_centre[1],
-                             p[2] - coil_centre[2]);
-                       
-        const unsigned int coil_quadrant = get_quadrant(p0);
-        // Work out position vector with respect to corner centre for this quadrant
-        // and find the quadrant with respect to the corner centre.
-        const Point<dim> p_corner (p[0] - corner_centres[coil_quadrant][0],
-                                   p[1] - corner_centres[coil_quadrant][1],
-                                   p[2] - corner_centres[coil_quadrant][2]);
-        const unsigned int corner_quadrant = get_quadrant(p_corner);
-        
-        const double corner_angle = atan2(p_corner(1), p_corner(0));
-        // Return the tangent to the coil given the quadrants (with respect to coil and the corner) and angle.
-        const Point<dim> tangent_to_coil = get_tangent_by_quadrant(coil_quadrant,
-                                                                   corner_quadrant,
-                                                                   corner_angle);
-        for (unsigned int d=0; d<dim; ++d)
-        {
-          values[k](d) = current_magnitude*tangent_to_coil[d];
-          values[k](d+dim) = 0.0;
-        }
-      }  
-    }
-  }
-  
-  
-  template<int dim>
-  unsigned int TEAMBenchmark7<dim>::get_quadrant(const Point<dim> &p) const
-  {
-    // Returns the quadrant the given point lies within using atan2
-    // NOTE, WE NUMBER STARTING FROM 0.
-    // Quadrant 0 lies between -pi and -pi/2 (lower left),
-    // then we proceed anti-clockwise.
-    const double pi = numbers::PI;
-    const double piby2 = numbers::PI/2.0;
-    const double theta = atan2(p(1), p(0));
-    if (-pi <= theta && theta < -piby2)
-    {
-      return 0;
-    }
-    else if (-piby2 <= theta && theta < 0)
-    {
-      return 1;
-    }
-    else if (0 <= theta && theta < piby2)
-    {
-      return 2;
-    }
-    else
-    {
-      return 3;
-    }
-  }
-  
-  template<int dim>
-  Point<dim> TEAMBenchmark7<dim>::get_tangent_by_quadrant(const unsigned int &coil_quadrant,
-                                                          const unsigned int &corner_quadrant,
-                                                          const double &corner_angle) const
-  {
-    // Returns the tangent to the TEAMBenchmark7 coil (square with rounded corners).
-    switch (coil_quadrant) {
-      case 0: {
-        switch (corner_quadrant) {
-          case 0: {
-            return Point<dim> (-sin(corner_angle), cos(corner_angle), 0.0);
-          }
-          case 1: {
-            return Point<dim> (1.0, 0.0, 0.0);
-          }
-          // case 2 not possible
-          case 3: {
-            return Point<dim> (0.0, -1.0, 0.0);
-          }
-          default: {
-            return Point<dim> (0.0, 0.0, 0.0);
-          }
-        }
-      }
-      case 1: {
-        switch (corner_quadrant) {
-          case 0: {
-            return Point<dim> (1.0, 0.0, 0.0);
-          }
-          case 1: {
-            return Point<dim> (-sin(corner_angle), cos(corner_angle), 0.0);
-          }
-          case 2: {
-            return Point<dim> (0.0, 1.0, 0.0);
-          }
-          // case 3 not possible.
-          default: {
-            return Point<dim> (0.0, 0.0, 0.0);
-          }
-        }
-      }
-      case 2:{
-        switch (corner_quadrant) {
-          // case 0 not possible.
-          case 1: {
-            return Point<dim> (0.0, 1.0, 0.0);
-          }
-          case 2: {
-            return Point<dim> (-sin(corner_angle), cos(corner_angle), 0.0);
-          }
-          case 3: {
-            return Point<dim> (-1.0, 0.0, 0.0);
-          }
-          default: {
-            return Point<dim> (0.0, 0.0, 0.0);
-          }
-        }
-      }
-      case 3:
-      {
-        switch (corner_quadrant) {
-          case 0: {
-            return Point<dim> (0.0, -1.0, 0.0);
-          }           
-          // case 1 not possible.
-          case 2: {
-            return Point<dim> (-1.0, 0.0, 0.0);
-          }
-          case 3: {
-            return Point<dim> (-sin(corner_angle), cos(corner_angle), 0.0);
-          }
-          default: {
-            return Point<dim> (0.0, 0.0, 0.0);
-          }
-        }
-      }
-      default: {
-        return Point<dim> (0.0, 0.0, 0.0);
-      }
-    }
-  }
-  template class TEAMBenchmark7<3>;
- */
-
 }

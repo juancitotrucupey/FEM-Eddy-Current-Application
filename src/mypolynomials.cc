@@ -40,19 +40,7 @@ namespace MyPolynomials
   void
   integratedLegendre::compute_coefficients (const unsigned int k_)
   {
-    // NOT REQUIRED AT THE MOMENT:
     
-    // make sure we call the
-    // Polynomial::shift function
-    // only with an argument with
-    // which it will not crash the
-    // compiler
-// #ifdef DEAL_II_LONG_DOUBLE_LOOP_BUG
-//     typedef double SHIFT_TYPE;
-// #else
-//     typedef long double SHIFT_TYPE;
-// #endif
-
     unsigned int k = k_;
 
     // first make sure that no other
@@ -104,20 +92,6 @@ namespace MyPolynomials
             recursive_coefficients[1] =
               std_cxx11::shared_ptr<const std::vector<double> >(c1);
 
-            // Compute polynomials orthogonal on [0,1]
-            /* REMOVED: NO SHIFT FOR NOW:
-            c0 = new std::vector<double>(*c0);
-            c1 = new std::vector<double>(*c1);
-                       
-            Polynomial<double>::shift<SHIFT_TYPE> (*c0, -1.);
-            Polynomial<double>::scale(*c0, 2.);
-            Polynomial<double>::shift<SHIFT_TYPE> (*c1, -1.);
-            Polynomial<double>::scale(*c1, 2.);
-            Polynomial<double>::multiply(*c1, std::sqrt(3.));
-
-            shifted_coefficients[0]=std_cxx11::shared_ptr<const std::vector<double> >(c0);
-            shifted_coefficients[1]=std_cxx11::shared_ptr<const std::vector<double> >(c1);
-            */
           }
         else
           {
@@ -147,17 +121,6 @@ namespace MyPolynomials
             recursive_coefficients[k] =
               std_cxx11::shared_ptr<const std::vector<double> >(ck);
               
-            // and compute the coefficients for [0,1]
-            /* REMOVED THE SHIFT FOR NOW.
-            ck = new std::vector<double>(*ck);
-            
-            Polynomial<double>::shift<SHIFT_TYPE> (*ck, -1.);
-            Polynomial<double>::scale(*ck, 2.);
-            Polynomial<double>::multiply(*ck, std::sqrt(2.*k+1.));
-            
-            shifted_coefficients[k] =
-              std_cxx11::shared_ptr<const std::vector<double> >(ck);
-            */
           };
       };
   }
@@ -173,7 +136,6 @@ namespace MyPolynomials
     // then get a pointer to the array of coefficients. do that in a MT safe way
     Threads::Mutex::ScopedLock lock (coefficients_lock);
     return *recursive_coefficients[k];
-//     return *shifted_coefficients[k];
   }
 
 

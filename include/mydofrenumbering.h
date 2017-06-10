@@ -31,12 +31,14 @@ using namespace dealii;
 //************************************************MyDoFRenumbering*****************************************
 namespace MyDoFRenumbering
 {
+  //-----------------------------------by_dymension()---------------------------------------------------
   template <int dim, class DH>
   void by_dimension (DH &dof_handler,
                      std::vector<unsigned int> &dof_counts);
-  
+  //-----------------------------------my_renu,bering()--------------------------------------------------
   template <int dim, class DH>
   void my_renumbering (DH &dof_handler,
                        std::vector<unsigned int> &dof_counts);
 }
+//************************************************MyDoFRenumbering*******************************************************
 #endif

@@ -68,8 +68,8 @@ namespace ForwardSolver
 {
   using namespace dealii;
   //_______________________________________EddyCurrent_____________________________________________________
-  // TODO:
-  // At the moment this is a general vector-wave equation solver. ?? It may be a good idea to rename it ???
+  // 
+  // At the moment this is a general vector-wave equation solver. 
   //
   // It can be made to be an eddy current solver with the correct choice of material parameters.
   //
@@ -114,84 +114,87 @@ namespace ForwardSolver
     // Output:
     // - a solution vector for the coeffs of the FE solution of the PDE
   public:
+    //----------------------------EddyCurrent()----------------------------------------------------------------
     EddyCurrent (DH &dof_handler, //puntero hacia dof_handler
                  const FiniteElement<dim> &fe,
                  const bool direct_flag = false);
-    EddyCurrent (const Mapping<dim,dim> &mapping_in, //Mapping<dim,dim> calse deDeal.ii utilizada para manejar el mapeo de la celda unidad a una celda cualquiera
+    //-----------------------------EddyCurrent()-------------------------------------------------------------
+    EddyCurrent (const Mapping<dim,dim> &mapping_in, //Mapping<dim,dim> calse deDeal.ii utilizada para manejar el mapeo de la celda unidad a una  celda cualquiera
                  DH &dof_handler, //puntero hacia dof_handler
                  const FiniteElement<dim> &fe,
                  const bool direct_flag = false);
-    
+    //-----------------------------~EddyCurrent()------------------------------------------------------------------------------
     ~EddyCurrent ();
-    
+    //-----------------assemble_matrice()------------------------------------------------
     void assemble_matrices (const DH &dof_handler);
-
+    //-------------------assemble_rhs()-----------------------------------------------------------------------
     void assemble_rhs (const DH &dof_handler,
                        const EddyCurrentFunction<dim> &boundary_function); //EddyCurrentFunction<dim> definida en curlfunction.h
-    
+    //-----------------------initialise_solver()--------------------------------------------------
     void initialise_solver();
+    //-------------------------solve()------------------------------------------------------------------------
     void solve (Vector<double> &output_solution,
                 unsigned int &n_iterations);
-    
-    
+        
   private:
+    //---------------------constructor_setup()---------------------------------------------------------------
     void constructor_setup(DH &dof_handler, //puntero hacia dof_handler
                            const bool direct_flag);
-    
+    //---------------------compute_constrains()------------------------------------------------------------
     void compute_constraints (const DH &dof_handler, //puntero hacia dof_handler
                               const EddyCurrentFunction<dim> &boundary_function);
-    
-    // FE storage:
-    const SmartPointer< const FiniteElement<dim> > fe; // TODO: check if ok, or should be protected??
+    // FE storage:    
+    //------------------------fe,p,quad_order---------------------------------------------
+    const SmartPointer< const FiniteElement<dim> > fe;
     unsigned int p_order;
     unsigned int quad_order;
-    
     // Mapping storage:
+    //------------------------mapping-------------------------------------------------------------------
     SmartPointer< const Mapping<dim> > mapping; //Clase de Dela.ii, un puntero
-    
     // Block sparse storage:
+    //------------------sparsity_pattern,system_matrix,solution,system_rhs-------------------------------------------
     BlockSparsityPattern sparsity_pattern; //Clase de Dela.ii
     BlockSparseMatrix<double> system_matrix; //Clase de Dela.ii
     BlockVector<double> solution; //Clase de Dela.ii
     BlockVector<double> system_rhs; //Clase de Dela.ii
-    
     // Dof ordering storage:
+    //------------------n_lowest_order_dofs,n_higher_order_dofs------------------------------------------
     unsigned int n_lowest_order_dofs;
     unsigned int n_higher_order_dofs;
-    
+    //---------------n_gradiente_realmn_nongradient_real,n_gradient_imag,n_nongradient_imag-------------------------------------
     unsigned int n_gradient_real;
     unsigned int n_nongradient_real;
     unsigned int n_gradient_imag;
     unsigned int n_nongradient_imag;
-    
+    //-------------------n_higher_order_gradiente_dofs,n_higher_order_non_gradient_dofs-----------------------------------------
     unsigned int n_higher_order_gradient_dofs;
     unsigned int n_higher_order_non_gradient_dofs;
-    
     // Make-up of the re-ordering global dofs:
     // These are used to avoid confusion when accessing
     // different blocks in vector/array of length dof_handler.n_dofs().
     // each defines the end point of a particular block (i.e. where the next one begins).
+    //--------end_lowest_order_dofs,end_gradient_dofs_real,end_nongradient_dofs_real,end_gradient_dofs_imag,end_nongradient_dofs_imag-----------
     unsigned int end_lowest_order_dofs;
     unsigned int end_gradient_dofs_real;
     unsigned int end_nongradient_dofs_real;
     unsigned int end_gradient_dofs_imag;
     unsigned int end_nongradient_dofs_imag;
-    
     // Preconditioner:
+    //----------preconditioner_sparsity_pattern,system_preconditioner,preconditioner-----------------------------------------
     BlockSparsityPattern preconditioner_sparsity_pattern;
     BlockSparseMatrix<double> system_preconditioner;
-    // TODO: would this be better as SmartPointer<Preconditioner::EddyCurrentPreconditionerBase> preconditioner; ??
     Preconditioner::EddyCurrentPreconditionerBase* preconditioner;
-    
     // Constraints:
+    //---------------constraints---------------------------------------------------------------------------
     ConstraintMatrix constraints; //Clase de Dela.ii
-    
     // Linear Algebra Storage:
+    //-----------------initialised,direct,direct_solve-------------------------------------------------------------
     bool initialised = false;
     bool direct = false;
     SparseDirectUMFPACK direct_solve; //Clase de Dela.ii
     
-  // protected: // removed, used to contain smart pointer for fe.
   };  
+  //_________________________________________________________EddyCurrent,end___________________________________________
 }
+//**********************************************ForwardSolver,end***************************************************
 #endif

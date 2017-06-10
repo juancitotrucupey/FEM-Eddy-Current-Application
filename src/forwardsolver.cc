@@ -78,7 +78,7 @@ namespace ForwardSolver
 
     p_order = fe->degree - 1;
     
-    //TODO: work out what the order should be.
+    //work out what the order should be.
     // Some quick tests suggest it should be 2*N+4..
     // this is when the voltages didn't change against the next order up (2*N+5).
     quad_order = 2*(fe->degree) + 1;
@@ -137,7 +137,7 @@ namespace ForwardSolver
     constraints.clear ();
     
     
-    // TODO: This calling of project_boundary_values_curl_conforming_l2 is very wasteful at this point.
+    //        This calling of project_boundary_values_curl_conforming_l2 is very wasteful at this point.
     //       What we actually need to do is simply flag the DoFs which will be constrained by this function.
     //       That is as simple as looking at the boundary_id of edges/faces of each cell and then findings the DoFs.
     //       Then we can just mirror the bits of the project_boundary_values_curl_conforming_l2 which pick out the DoFs
@@ -179,7 +179,7 @@ namespace ForwardSolver
       
       for (;cell!=endc; ++cell)
       {
-        // TODO: update with the conductor material id from stored data.
+        // update with the conductor material id from stored data.
         if (cell->material_id() == 1)
         {
           cell->get_dof_indices (local_dof_indices);
@@ -194,7 +194,7 @@ namespace ForwardSolver
       cell = dof_handler.begin_active();
       for (;cell!=endc; ++cell)
       {
-        // TODO: update with the non-conductor material id from stored data.
+         //update with the non-conductor material id from stored data.
         if (cell->material_id() != 1)
         {
           cell->get_dof_indices (local_dof_indices);
@@ -332,8 +332,7 @@ namespace ForwardSolver
   EddyCurrent<dim, DH>::~EddyCurrent ()
   {
     // Deconstructor: need to delete the pointers to preconditioners
-    // TODO: Could this be better handled with a smart pointer?
-    
+        
     if (!direct)
     {
       delete preconditioner;
@@ -389,7 +388,7 @@ namespace ForwardSolver
       
       for (;cell!=endc; ++cell)
       {
-        // TODO: update with the conductor material id from stored data.
+        //update with the conductor material id from stored data.
         if (cell->material_id() == 1)
         {
           cell->get_dof_indices (local_dof_indices);
@@ -404,7 +403,7 @@ namespace ForwardSolver
       cell = dof_handler.begin_active();
       for (;cell!=endc; ++cell)
       {
-        // TODO: update with the non-conductor material id from stored data.
+        // update with the non-conductor material id from stored data.
         if (cell->material_id() == 0)
         {
           cell->get_dof_indices (local_dof_indices);
@@ -448,7 +447,6 @@ namespace ForwardSolver
     
     
     // Extractors to real and imaginary parts
-    // TODO: this would make things easier:
     const FEValuesExtractors::Vector E_re(0);
     const FEValuesExtractors::Vector E_im(dim);
     
@@ -709,44 +707,43 @@ namespace ForwardSolver
         {-current_kappa_im, -current_kappa_re} };
       
       // Update the fe values object.
-      // TODO: Could we avoid this in cases with zero RHS and homogenous constraints ???
       fe_values.reinit (cell);
       cell->get_dof_indices (local_dof_indices);
       
       // Loop for non-zero right hand side in equation:
       // Only needed if the RHS is non-zero.
       if (!boundary_function.zero_rhs())
-      {
-        // RHS Storage:
-        std::vector<Vector<double> > rhs_value_list(n_q_points, Vector<double>(fe->n_components()));
-        Tensor<1,dim> rhs_value;
+	{
+	  // RHS Storage:
+	  std::vector<Vector<double> > rhs_value_list(n_q_points, Vector<double>(fe->n_components()));
+	  Tensor<1,dim> rhs_value;
         
-        boundary_function.rhs_value_list(fe_values.get_quadrature_points(), rhs_value_list, cell->material_id());
-        for (unsigned int i=0; i<dofs_per_cell; ++i)
-        {
-          if (!constraints.is_constrained(local_dof_indices[i]))
-          {
-            const unsigned int block_index_i = fe->system_to_block_index(i).first;
-            const unsigned int d_shift = block_index_i*dim;
-            double rhs_term = 0;
+	  boundary_function.rhs_value_list(fe_values.get_quadrature_points(), rhs_value_list, cell->material_id());
+	  for (unsigned int i=0; i<dofs_per_cell; ++i)
+	    {
+	      if (!constraints.is_constrained(local_dof_indices[i]))
+		{
+		  const unsigned int block_index_i = fe->system_to_block_index(i).first;
+		  const unsigned int d_shift = block_index_i*dim;
+		  double rhs_term = 0;
             
-            for (unsigned int q_point=0; q_point<n_q_points; ++q_point)
-            {
-              for (unsigned int d=0; d<dim; ++d)
-              {
-                rhs_value[d] = rhs_value_list[q_point](d+d_shift);
-              }
-              rhs_term += rhs_value
-              *fe_values[vec[block_index_i]].value(i,q_point)
-              *fe_values.JxW(q_point);
-            }
-            // Remember the J_{s} term is multiplied by mu0, this
-            // is communicated by EquationData::rhs_factor, which
-            // has been passed into rhs_coefficient, above.
-            cell_rhs(i) = rhs_coefficient[block_index_i]*rhs_term;
-          }
-        }
-      }
+		  for (unsigned int q_point=0; q_point<n_q_points; ++q_point)
+		    {
+		      for (unsigned int d=0; d<dim; ++d)
+			{
+			  rhs_value[d] = rhs_value_list[q_point](d+d_shift);
+			}
+		      rhs_term += rhs_value
+			*fe_values[vec[block_index_i]].value(i,q_point)
+			*fe_values.JxW(q_point);
+		    }
+		  // Remember the J_{s} term is multiplied by mu0, this
+		  // is communicated by EquationData::rhs_factor, which
+		  // has been passed into rhs_coefficient, above.
+		  cell_rhs(i) = rhs_coefficient[block_index_i]*rhs_term;
+		}
+	    }
+	}
       
       // Loop over faces for neumann condition:
       // Only needed if the neumann values are non-zero.
@@ -803,14 +800,10 @@ namespace ForwardSolver
       // DoF. These are all that are needed to apply the constraints to the RHS
       cell_matrix = 0;
       
-      // TODO: Add a check to avoid this loop entirely if there are no constraints to apply.
-      //       This might mean no inhomogenities, or no hanging node constraints, etc.. need to work out how to be sure of this.
-      //       At the moment, eliminating the gradient-based DoFs causes this to compute a lot of columns - are they really needed at all??
       for (unsigned int j=0; j<dofs_per_cell; ++j)
       {
         // Check each column to see if it corresponds to a constrained DoF:
-        // TODO: This might be better if we used is_inhomogeneously_constrained.
-        //       It may save a significant amount of computation if it does work?
+        
         if ( constraints.is_inhomogeneously_constrained(local_dof_indices[j]) )
         {
           const unsigned int block_index_j = fe->system_to_block_index(j).first;
@@ -879,7 +872,7 @@ namespace ForwardSolver
   void EddyCurrent<dim, DH>::initialise_solver() // removed:(const bool direct_solver_flag)
   {
     // Initialise the direct solver or preconditioner depending on solver choice.
-    // Always use the direct solver for p=0. // TODO update documentation here.
+    // Always use the direct solver for p=0. 
     // Once initialised, the boolean variable initialised will be set to true, so that
     // the initialisation won't be repeated.
     
@@ -969,8 +962,6 @@ namespace ForwardSolver
       constraints.distribute (solution);
     }
   
-    // TODO: may not be able to pass to the output solution like this:
-    // seems to be ok. for now.
     output_solution.reinit(solution.size());
     output_solution = solution;
   }

@@ -211,14 +211,14 @@ MyFE_Nedelec<dim>::get_data (
   
   const unsigned int n_line_dofs = dofs_per_line*lines_per_cell;
   const unsigned int n_face_dofs = dofs_per_quad*faces_per_cell;
-  const unsigned int n_cell_dofs = (dim == 2) ? dofs_per_quad : dofs_per_hex; //TODO create switch for dim=2/3
+  const unsigned int n_cell_dofs = (dim == 2) ? dofs_per_quad : dofs_per_hex; 
     
   const UpdateFlags flags(data->update_flags);
   const unsigned int n_q_points = quadrature.size();
   
   // In all cases we want to fill the values of sigma & lambda in the
   // internal data class.
-  // TODO: decide if this is needed.
+  // 
   // Resize the storage:
   data->sigma.resize(n_q_points);
   data->sigma_imj_values.resize(n_q_points);  
@@ -306,7 +306,7 @@ MyFE_Nedelec<dim>::get_data (
       
       
       // Now fill edgeDoF_to_poly
-      // TODO CHECK THIS IS RIGHT (first check OK.. will do one more).
+      // CHECK THIS IS RIGHT (first check OK.. will do one more).
       //
       // polyspace is Lx_i (x) Ly_j, 0 <= i,j < degree+2
       //
@@ -344,7 +344,7 @@ MyFE_Nedelec<dim>::get_data (
       }
       
       // For now we only precompute the cell-based shape functions
-      // TODO: However, we could also precompute the edge-based ones
+      // However, we could also precompute the edge-based ones
       // on the "standard" cell and store them. Then by simply comparing
       // the local edge numberings, we could avoid recomputing in fill_fe*_values.
       //  
@@ -373,7 +373,7 @@ MyFE_Nedelec<dim>::get_data (
       //      This is simple enough as there is only 1 lowest order and degree higher
       //      orders DoFs per line.
       //
-      // TODO: Add faces (in 3D).
+      // 
       //
       // On a cell (in 2D, TODO: include 3D), we have 3 types: Type 1/2/3:
       //    - The ordering done by type:
@@ -445,18 +445,13 @@ MyFE_Nedelec<dim>::get_data (
           unsigned int cell_type3_offset = n_line_dofs + 2*degree*degree;
           
           // Loop through quad points:
-          //
-          // TODO: Large amounts of this could be avoided if we
-          //       had a MyPolynomialsNedelec which generated the shape functions very carefully,
-          //       in the correct order. I.e. the polynomial_space produces vector-valued values, etc.
-          //       See the current PolynomialsNedelec as an example.
-          
+                    
           for (unsigned int q=0; q<n_q_points; ++q)
           {
             polynomial_space.compute(cell_points[q], values, grads, grad_grads);
             if (flags & update_values)
             {
-              // TODO merge all 3 types into a single set of nested loops over dof_i/dof_j.
+              // merge all 3 types into a single set of nested loops over dof_i/dof_j.
               for (unsigned int dof_j=0; dof_j<degree; ++dof_j)
               {
                 const unsigned int dof_shift1 (cell_type1_offset + dof_j*degree);
@@ -529,8 +524,7 @@ MyFE_Nedelec<dim>::get_data (
                 // polyi[d][n] stores the nth derivative of L_{j+2} at cell_points[q][d]
                 // i.e. 2x-1, d = 0. 2y-1 for d=1.
                 std::vector<std::vector<double> > polyj(dim, std::vector<double> (3));
-                // TODO: Could avoid computing the above multiple times.
-                //       Maybe introduce n_derivatives=2 or 3 and re-use for shape values and grads.
+                
                 for (unsigned int d=0; d<dim; ++d)
                 {
                   polynomials_1d[dof_j+2].value(cell_points[q][d], polyj[d]);
@@ -576,8 +570,7 @@ MyFE_Nedelec<dim>::get_data (
     }
     case 3:
     {
-      // TODO: decide if these need to be stored or just computed once here.
-      // Compute values of sigma & lambda and the sigma differences and lambda additions.
+      
       for (unsigned int q=0; q<n_q_points; ++q)
       {
         data->sigma[q][0] = (1.0 - p_list[q][0]) + (1.0 - p_list[q][1]) + (1 - p_list[q][2]);
@@ -724,8 +717,7 @@ MyFE_Nedelec<dim>::get_data (
         data->edge_lambda_grads_3d[11][q] = {y, x, 0.0};
       }
       // edge_lambda gradgrads:
-      // TODO: make sure all of these vectors are zero before we begin filling,
-      //       otherwise zero entries will have to be set explicitly.
+      
       const int 
       edge_lambda_sign[GeometryInfo<3>::lines_per_cell]
       = {1, -1, 1, -1,
@@ -956,7 +948,7 @@ MyFE_Nedelec<dim>::get_data (
                   const unsigned int dof_index3_2(cell_type3_offset2 + shift_ij);
                   const unsigned int dof_index3_3(cell_type3_offset3 + shift_ij);
                   // Only need to fill in the non-zero values as the array is initialised to zero.
-                  // TODO: CHECK TRUE!!
+                  
                   for (unsigned int d1=0; d1<dim; ++d1)
                   {
                     for (unsigned int d2=0; d2<dim; ++d2)
@@ -1005,7 +997,7 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
   // It should be called by the fill_fe_*_values routines in order to complete the
   // basis set at quadrature points on the current cell for each edge.
   
-  // TODO: Add caching to make this more efficient.
+  
   
   const UpdateFlags flags(fe_data.current_update_flags());
   const unsigned int n_q_points = quadrature.size();
@@ -1033,13 +1025,7 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
   {
     case 2:
     {
-      // TODO:
-      //     - Switch the 2D implementation over to match the way 3D handles it
-      //     - i.e. calculate values/grads/gradgrads for edge_sigma/lambda in the get_data
-      //       routine.
-      //     - this streamlines a lot of the following.
-      //     - Can then remove the precomputation of a lot of other things.
-      
+            
       // Define an edge numbering so that each edge, E_{m} = [e^{m}_{1}, e^{m}_{2}]
       // e1 = higher global numbering of the two local vertices
       // e2 = lower global numbering of the two local vertices
@@ -1142,17 +1128,13 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
         
       }
       
-      // TODO: move to fe's data and precompute it
-      //       in 2D it'll be (1 1 0 0), 3D needs a little thought. probs 1 1 1 1, 0 0 0 0 and 2 2 2 2 ??
-      // NOT USED AT THE MOMENT.. could still be useful.
-      std::vector<unsigned int> edge_helper(lines_per_cell);
+       std::vector<unsigned int> edge_helper(lines_per_cell);
       edge_helper[0] = 1;
       edge_helper[1] = 1;
       edge_helper[2] = 0;
       edge_helper[3] = 0;
       
-      // TODO:
-      // Make use of && cell_similarity != CellSimilarity::translation to avoid recomputing things we don't need.
+      
       if (flags & update_values)
       {
         // Lowest order shape functions (edges):
@@ -1170,7 +1152,6 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
         }
         if (degree>0)
         {
-          // TODO: replace with use of polynomials1d (see grads below too).
           std::vector<double> values (0);
           std::vector<Tensor<1,dim>> grads (polynomial_space.n ());
           std::vector<Tensor<2,dim>> grad_grads (0);
@@ -1193,8 +1174,7 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
           }
         }
       }
-      // TODO: streamline by moving into the same loop as the shape_values
-      //       can use similar style to the get_data function.
+     
       if (flags & update_gradients)
       {
         // Lowest order shape functions (edges):
@@ -1216,7 +1196,6 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
         }
         if (degree>0)
         {
-          // TODO: May be more efficient to use polynomials1d (as in the cell-based type 2/3) instead:
           std::vector<double> values (0);
           std::vector<Tensor<1,dim>> grads (0);
           std::vector<Tensor<2,dim>> grad_grads (polynomial_space.n ());
@@ -1304,8 +1283,7 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
         // More more info: see GeometryInfo for picture of the standard element.
         //
         // Copy over required edge-based data:
-        // TODO: replace this using sigma_imj_values and use signs and components to create the
-        //       list of edge_sigma_values on this element.
+        
         std::vector<std::vector< double > > edge_sigma_values(fe_data.edge_sigma_values);
         //       (lines_per_cell,
         //        std::vector<double> (n_q_points));
@@ -1325,7 +1303,7 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
         std::vector<std::vector<std::vector< double > > > edge_lambda_gradgrads_3d(fe_data.edge_lambda_gradgrads_3d);
         
         // Adjust the edge_sigma_* for the current cell:
-        // TODO: check this works, otherwise add loops?
+        
         for (unsigned int m=0; m<lines_per_cell; ++m)
         {
           std::transform (edge_sigma_values[m].begin(), edge_sigma_values[m].end(),
@@ -1352,7 +1330,7 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
           for (unsigned int q=0; q<n_q_points; ++q)
           {
             // precompute values of all 1d polynomials required:
-            // TODO: Could avoid if statement by rearranging to use i=1; i<degree+1
+            
             if (degree>0)
             {
               for (unsigned int i=0; i<degree; ++i)
@@ -1363,14 +1341,12 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
             if (flags & update_values)
             {
               // Lowest order shape functions:
-              // TODO: could probably improve effiency of these loops - sigma_grads doesn't depend on q
-              //       and lambda_values doesn't depend on d.
-              //       Same goes for the update_gradients part.
+              
               for (unsigned int d=0; d<dim; ++d)
               {
                 fe_data.shape_values[shift_m][q][d] = 0.5*edge_sigma_grads[m][d]*edge_lambda_values[m][q];
               }
-              // TODO: Could avoid if statement by rearranging to use i=1; i<degree+1
+              
               if (degree>0)
               {
                 for (unsigned int i=0; i<degree; ++i)
@@ -1396,7 +1372,7 @@ void MyFE_Nedelec<dim>::fill_edge_values(const typename Triangulation<dim,dim>::
                   
                 }
               }
-              // TODO: Could avoid if statement by rearranging to use i=1; i<degree+1
+              
               if (degree>0)
               {
                 for (unsigned int i=0; i<degree; ++i)
@@ -1444,14 +1420,14 @@ void MyFE_Nedelec<dim>::fill_face_values(const typename Triangulation<dim,dim>::
   // It should be called by the fill_fe_*_values routines in order to complete the
   // basis set at quadrature points on the current cell for each face.
   
-  // TODO: Add caching to make this more efficient.
+  
   
   // Useful constants:
   const unsigned int degree (this->degree-1); // Note: constructor takes input degree + 1, so need to knock 1 off.
   const unsigned int superdegree (this->degree); // Note: constructor takes input degree + 1, so need to knock 1 off.
   
   // Do nothing if FE degree is 0.
-  // TODO: could remove, probs not needed.
+  
   if (degree>0)
   {
     const UpdateFlags flags(fe_data.current_update_flags());
@@ -1756,9 +1732,7 @@ void MyFE_Nedelec<dim>::fill_fe_values(
   
   const unsigned int dofs_per_cell (this->dofs_per_cell);
 
-  // TODO:
-  // Make use of && cell_similarity != CellSimilarity::translation to avoid recomputing things we don't need.
-  // May not be possible due to edge reorderings.
+  
   if (flags & update_values)
   {
     // Now have all shape_values stored on the reference cell.
@@ -1781,8 +1755,7 @@ void MyFE_Nedelec<dim>::fill_fe_values(
       }
     }
   }
-  // TODO: streamline by moving into the same loop as the shape_values
-  //       can use similar style to the get_data function.
+  
   if (flags & update_gradients)
   {
     // Now have all shape_grads stored on the reference cell.
@@ -1822,9 +1795,7 @@ void MyFE_Nedelec<dim>::fill_fe_face_values (
   typename Mapping<dim,dim>::InternalDataBase          &fedata,
   FEValuesData<dim,dim>                                &data) const
 {
-  // TODO: problem is that we don't have the full quadrature.. should use QProjector to create the 2D quadrature.
-  
-  // TODO: For now I am effectively generating all of the shape function vals/grads, etc
+  //       For now I am effectively generating all of the shape function vals/grads, etc
   //       On all quad points on all faces and then only using them for one face.
   //       This is obviously inefficient. I should cache the cell number and cache
   //       all of the shape_values/gradients etc and then reuse them for each face.
@@ -1855,7 +1826,7 @@ void MyFE_Nedelec<dim>::fill_fe_face_values (
   const UpdateFlags flags(fe_data.update_once | fe_data.update_each);
   const unsigned int n_q_points = quadrature.size();
 
-  // TODO: Make sense of this: should we use the orientatation/flip/rotation information??
+  
   // offset determines which data set
   // to take (all data sets for all
   // faces are stored contiguously)

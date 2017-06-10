@@ -22,9 +22,7 @@ using namespace dealii;
 
 namespace EquationData
 {
-  // Namespace containing data for use with the EddyCurrent class
-  // TODO: clean up and possibly rename to "EddyCurrentData" to make it clear where it is used??
-  
+    
   // Electromagnetic constants:
   const double constant_epsilon0 = 8.85418782e-12; // electric constant (permittivity)
   const double constant_mu0 = 4.0*numbers::PI*1e-7;//1.25663706e-6; // magnetic constant (permeability)
@@ -41,9 +39,7 @@ namespace EquationData
   
   // 
   // Material parameter of the conducting object
-  // TODO: Eventually this will be removed 
-  //       when we're interested in more parameters.
-  //
+  
   double param_epsilon_conducting = 0.0;
   double param_sigma_conducting = 0.0;
   double param_mur_conducting = 1.0;  
@@ -73,16 +69,7 @@ namespace PolarizationTensor
   std::vector< FullMatrix<double> > polarizationTensor(2, FullMatrix<double> (3,3));
   std::vector< Vector<double> > H0(2, Vector<double> (3));
 }
-/*
-namespace TEAMBenchmark
-{
-  // Data for the team benchmark problem.
-  bool enable = false;
-  Point<3> coil_centre;
-  std::vector<Point<3>> corner_centres(4);
-  types::material_id coil_material_id;
-}
-*/
+
 namespace MeshData
 {
   // Flag for external mesh
@@ -119,8 +106,6 @@ namespace MeshData
 namespace IO_Data
 {
   // Input/output data for use with the input/output classes
-  // TODO: look at splitting into two namespaces (1 input and 1 output).
-  // IS THIS EVEN REQUIRED ANYMORE ???
   std::string mesh_filename = "mesh.ucd";
   std::string parameter_filename = "input.prm";
   std::string output_filename = "solution";
@@ -138,72 +123,4 @@ namespace PreconditionerData
   
   bool constrain_gradients = true;
 }
-/*
-namespace ExcitationCoilData
-{
-  // Contains all information about the excitation coils.
-  // This must be populated later in the code, either
-  // directly or via some input.
-  // This data will be used by the InverseSolver class, so must be
-  // filled first before calling routines in that class.
-  // TODO: alternative is to pass a structure with the data to that routine??
-    
-  // This data will be filled in by the input parameters
-  // it can then be used to fill the coil position/direction vectors.
-  unsigned int number_of_coils;
-  Tensor<1,3> array_centre;
-  double array_radius = 0.145;
-  double array_angle = 0.0;
-  double coil_radius = 0.025;
-    
-  std::vector<Point<3>> coil_position;
-  std::vector<Tensor<1,3>> coil_direction;
-  
-}
-
-namespace SensorCoilData
-{
-  // Contains all information about sensor coils.
-  // This must be populated later in the code, either
-  // directly or via some input.
-  // This data will be used by the InverseSolver class, so must be
-  // filled first before calling routines in that class.
-  // TODO: alternative is to pass a structure with the data to that routine??
-    
-  // This data will be filled in by the input parameters
-  // it can then be used to fill the coil position/direction vectors.
-  unsigned int number_of_coils;
-  Tensor<1,3> array_centre;
-  double array_radius = 0.135;
-  double array_angle = 0.0;
-  double coil_radius = 0.025;
-  
-  std::vector<Point<3>> coil_position;
-  std::vector<Tensor<1,3>> coil_direction;
-}
-
-namespace InverseProblemData
-{
-  // Data specific to the inverse method
-  bool use_all = true; // not in the input file for now - update later if we need it?? (TODO)
-  unsigned int n_voxels; // Will be calculated when processing the mesh
-  unsigned int n_coil_combinations; // calculated from input data (number of sensor coils x number of excitation coils).
- 
-  // material_id within the input mesh for use in the setup routine.
-  types::material_id recovery_region_id;
-  types::material_id background_region_id;
-  
-  std::vector<Vector<double>> measured_voltages_re;
-  std::vector<Vector<double>> measured_voltages_im;
-  
-  // G-N data:
-  double gn_step_size;
-  double gn_regularisation_parameter;
-  unsigned int gn_max_iterations;
-  // Storage for Gauss Newton history:
-  Vector<double> initial_sigma;
-  
-  // TESTING: keep count of GN iterations.  
-  unsigned int iteration_count = 0;
-}*/
 

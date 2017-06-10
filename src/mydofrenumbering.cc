@@ -129,7 +129,7 @@ namespace MyDoFRenumbering
       //       gradient-based (edge/face/cell subtypes)
       //       non-gradient-based (face/cell subtypes) (NOTE: lack of edge-based non-gradients!).
       //
-      // TODO: could provide an option to re-order this so we have:
+      //       could provide an option to re-order this so we have:
       //       lower order
       //       edges (gradients subtype ONLY)
       //       faces (gradients/non-gradients subtypes)
@@ -146,7 +146,7 @@ namespace MyDoFRenumbering
       // NOTE: for each edge/face/cell the gradient-based DoFs come first
       // then the non-gradients (see new FE_Nedelec element).
       // There are no non-gradients on edges, so we only need face & cell limits:
-      // TODO: this would change in 2D.
+      // this would change in 2D.
       const unsigned int n_gradients_per_face(degree*degree);
       const unsigned int n_gradients_per_cell(degree*degree*degree);
       
@@ -363,7 +363,7 @@ namespace MyDoFRenumbering
   
   
   // New renumbering, designed for the eddy current problem with the zaglmayr nedelec element:
-  // TODO:
+  // 
   // This could be handled using 2 reorderings, making this code more reusable for other purposes.
   // reordering 1 could produce a set of reorderings for each base element & multiplicity:
   // - by lower order, gradient-based and non-gradient
@@ -473,7 +473,7 @@ namespace MyDoFRenumbering
       // NOTE: for each edge/face/cell the gradient-based DoFs come first
       // then the non-gradients (see new FE_Nedelec element).
       // There are no non-gradients on edges, so we only need face & cell limits:
-      // TODO: this would change in 2D.
+      //  this would change in 2D.
       const unsigned int n_gradients_per_face(degree*degree);
       const unsigned int n_gradients_per_cell(degree*degree*degree);
       

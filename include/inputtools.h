@@ -49,28 +49,39 @@ namespace InputTools
   class ParameterReader : public Subscriptor //Clase de Dela.ii
   {
   public:
+    //---------------------------ParameterReader()------------------------------------------
     ParameterReader(ParameterHandler &paramhandler); //ParameterHandler clase de Deal.ii
+    //---------------------------------~ParameterReader()------------------------------------------
     ~ParameterReader();
+    //------------------------read_parameters()-----------------------------------------------------
     void read_parameters (const std::string);
+    //------------------------read_and_copy_parameters()-----------------------------------------------
     void read_and_copy_parameters (const std::string);
+    //----------------------------copy_parameters()--------------------------------------------------
     void copy_parameters ();
     
   private:
+    //----------------------------declare_parameters()--------------------------------------
     void declare_parameters();
+    //-----------------------------------copy_to_equation_data()-----------------------------------------------------
     void copy_to_equation_data();
+    //-----------------------------get_matrix_from_list()-----------------------------------------------------------
     void get_matrix_from_list(const std::string entry,
                               FullMatrix<double> &matrix_out,
                               const unsigned int mRows,
                               const unsigned int nCols);
-    
+    //------------------------------get_vector_from_list()----------------------------------------------------------
     void get_vector_from_list(const std::string entry,
                               Vector<double> &vector_out,
                               const unsigned int vector_length = 0);
-    
+    //-------------------------------get_vector_lenght_from_list()----------------------------------------------
     unsigned int get_vector_length_from_list(const std::string entry,
                                              const char delimiter);
+    //----------------------------------prm--------------------------------------------------------------------------
     ParameterHandler &prm;
   };
+  //___________________________________________ParameterReader,end___________________________________________________________
   
 }
+//*****************************************************InputTools,end*******************************************************
 #endif
